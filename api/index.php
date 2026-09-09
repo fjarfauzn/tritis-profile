@@ -1,4 +1,4 @@
 <?php
 
-// Forward request ke file public/index.php Laravel
+// Trigger new build
 require __DIR__ . '/../public/index.php';
