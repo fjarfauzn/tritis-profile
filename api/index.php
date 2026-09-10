@@ -1,5 +1,25 @@
 <?php
 
+// Buat folder kompilasi view dan cache di /tmp jika belum ada
+$storagePaths = [
+    '/tmp/storage/framework/views',
+    '/tmp/storage/framework/cache',
+    '/tmp/storage/framework/sessions',
+    '/tmp/storage/bootstrap/cache',
+];
+
+foreach ($storagePaths as $path) {
+    if (!file_exists($path)) {
+        mkdir($path, 0755, true);
+    }
+}
+
+// Ubah path storage & bootstrap cache Laravel ke /tmp
+app()->useStoragePath('/tmp/storage');
+app()->useBootstrapPath('/tmp/storage/bootstrap');
+
+require __DIR__ . '/../public/index.php';
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
