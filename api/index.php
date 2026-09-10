@@ -1,6 +1,12 @@
 <?php
 
-// Buat folder kompilasi view dan cache di /tmp jika belum ada
+// 1. Muat autoloader composer
+require __DIR__ . '/../vendor/autoload.php';
+
+// 2. Inisialisasi aplikasi Laravel
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// 3. Buat folder temporary di /tmp untuk Vercel (read-only filesystem)
 $storagePaths = [
     '/tmp/storage/framework/views',
     '/tmp/storage/framework/cache',
@@ -14,56 +20,16 @@ foreach ($storagePaths as $path) {
     }
 }
 
-// Ubah path storage & bootstrap cache Laravel ke /tmp
-app()->useStoragePath('/tmp/storage');
-app()->useBootstrapPath('/tmp/storage/bootstrap');
+// 4. Set path storage ke /tmp
+$app->useStoragePath('/tmp/storage');
 
-require __DIR__ . '/../public/index.php';
+// 5. Jalankan aplikasi via Kernel HTTP
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
 
-// 1. Buat direktori wajib di /tmp
-$dirs = [
-    '/tmp/storage/app/public',
-    '/tmp/storage/framework/views',
-    '/tmp/storage/framework/cache/data',
-    '/tmp/storage/framework/sessions',
-    '/tmp/storage/bootstrap/cache',
-];
+$response->send();
 
-foreach ($dirs as $dir) {
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
-    }
-}
-
-// 2. Override environment variable untuk storage & config cache
-putenv('APP_STORAGE_PATH=/tmp/storage');
-$_ENV['APP_STORAGE_PATH'] = '/tmp/storage';
-
-try {
-    require __DIR__ . '/../vendor/autoload.php';
-    
-    /** @var \Illuminate\Foundation\Application $app */
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
-
-    // Set path storage ke /tmp
-    $app->useStoragePath('/tmp/storage');
-
-    // Bootstrap HTTP Kernel
-    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-    $response = $kernel->handle(
-        $request = Illuminate\Http\Request::capture()
-    );
-
-    $response->send();
-    $kernel->terminate($request, $response);
-
-} catch (\Throwable $e) {
-    echo "<h1>Runtime Exception Detected:</h1>";
-    echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
-    echo "<p><strong>File:</strong> " . htmlspecialchars($e->getFile()) . " line " . $e->getLine() . "</p>";
-    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
-}
+$kernel->terminate($request, $response);
