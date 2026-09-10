@@ -18,6 +18,11 @@
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/framework/views/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
 /storage/*.key
 /storage/pail
 /vendor
