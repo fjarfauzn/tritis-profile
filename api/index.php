@@ -1,11 +1,10 @@
 <?php
 
-// Tampilkan error jika ada masalah di tingkat PHP
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// 1. Buat folder temporary wajib Laravel di /tmp
+// 1. Siapkan folder temporary wajib di /tmp
 $storageDirs = [
     '/tmp/storage/app/public',
     '/tmp/storage/framework/views',
@@ -20,29 +19,32 @@ foreach ($storageDirs as $dir) {
     }
 }
 
-// 2. Set environment path storage sebelum Laravel di-bootstrap
-putenv('APP_STORAGE_PATH=/tmp/storage');
-$_ENV['APP_STORAGE_PATH'] = '/tmp/storage';
-
 try {
-    // 3. Autoload & Bootstrap Laravel
+    // 2. Load Autoloader
     require __DIR__ . '/../vendor/autoload.php';
+
+    // 3. Bootstrap Application
     $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // 4. Bind Storage Path secara resmi ke Service Container
-    $app->useStoragePath('/tmp/storage');
+    // 4. Bind Storage Path setelah instance $app terbentuk
+    if (is_object($app) && method_exists($app, 'useStoragePath')) {
+        $app->useStoragePath('/tmp/storage');
+    }
 
-    // 5. Jalankan Application Request
-    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-    $response = $kernel->handle(
-        $request = Illuminate\Http\Request::capture()
-    );
+    // 5. Handle Request
+    if ($app instanceof Illuminate\Contracts\Http\Kernel) {
+        $kernel = $app;
+    } else {
+        $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    }
+
+    $request = Illuminate\Http\Request::capture();
+    $response = $kernel->handle($request);
 
     $response->send();
     $kernel->terminate($request, $response);
 
 } catch (\Throwable $e) {
-    http_response_code(500);
     echo "<h1>Runtime Exception:</h1>";
     echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
     echo "<p><strong>File:</strong> " . htmlspecialchars($e->getFile()) . " line " . $e->getLine() . "</p>";
