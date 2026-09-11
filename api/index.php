@@ -2,10 +2,10 @@
 
 use Illuminate\Http\Request;
 
-// 1. Load Autoload
+// 1. Load Autoload Vendor
 require __DIR__ . '/../vendor/autoload.php';
 
-// 2. Siapkan Folder Temporary Vercel (/tmp)
+// 2. Buat folder temporary wajib di /tmp Vercel
 $storageDirs = [
     '/tmp/storage/app/public',
     '/tmp/storage/framework/views',
@@ -20,17 +20,17 @@ foreach ($storageDirs as $dir) {
     }
 }
 
-// 3. Set Storage Environment
+// 3. Set Environment Variable Storage
 putenv('APP_STORAGE_PATH=/tmp/storage');
 $_ENV['APP_STORAGE_PATH'] = '/tmp/storage';
 
-// 4. Inisialisasi Aplikasi
+// 4. Inisialisasi Aplikasi Laravel
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// Overwrite path storage ke /tmp secara resmi
+// Overwrite path storage ke /tmp
 $app->useStoragePath('/tmp/storage');
 
-// 5. Jalankan via Illuminate\Contracts\Http\Kernel (Cara yang benar untuk Laravel 11+)
+// 5. Jalankan Request lewat HTTP Kernel
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $response = $kernel->handle(
