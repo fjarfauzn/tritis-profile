@@ -35,6 +35,9 @@ try {
     // 5. Ubah Storage Path ke /tmp
     $app->useStoragePath('/tmp/storage');
 
+    // 5b. WAJIB: Ubah Bootstrap Cache Path juga ke /tmp
+    $app->useBootstrapPath('/tmp/storage/bootstrap');
+
     // 6. Jalankan Request Kernel
     $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
     $response = $kernel->handle(
