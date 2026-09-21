@@ -23,7 +23,7 @@
                     dan potensi Padukuhan Tritis.
                 </p>
 
-                <a href="#" class="btn">
+                <a href="/profil" class="btn">
                     Jelajahi Tritis
                 </a>
 
